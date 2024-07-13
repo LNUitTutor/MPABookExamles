@@ -64,6 +64,35 @@ IntegerArithmetic >> inputNatural [
 		   title: 'Запит') asInteger abs
 ]
 
+{ #category : 'api - running' }
+IntegerArithmetic >> isPalindrome [
+	"Парадний метод для перевірки, чи задане число паліндром"
+
+	| givenNumber result pharoResult |
+	givenNumber := self inputNatural.
+	result := self isPalindrome: givenNumber.
+	pharoResult := givenNumber printString reversed asInteger = givenNumber.
+	self informAbout:
+	   '*** Перевірка, чи задане число одинаково читається зліва направо і навпаки.'
+		, String cr, 'задане число = ' , givenNumber printString
+		, (result ifTrue: [ ' - паліндром' ] ifFalse: [ ' - не паліндром' ] )
+		, String cr, '  перевірка засобами Pharo = ', pharoResult printString
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> isPalindrome: aNatural [
+	"Перевіряє, чи задане число - паліндром"
+
+	| reversedNumber restOfDigits rightmostDigit |
+	reversedNumber := 0.
+	restOfDigits := aNatural.
+	[ restOfDigits > 0 ] whileTrue: [
+		rightmostDigit := restOfDigits \\ 10.
+		reversedNumber := reversedNumber * 10 + rightmostDigit.
+		restOfDigits := restOfDigits // 10 ].
+	^ reversedNumber = aNatural
+]
+
 { #category : 'calculation' }
 IntegerArithmetic >> pharoDigitsAverageOf: aNatural [
 	"Обчислює середнє арифметичне цифр натурального числа вбудованими засобами"
