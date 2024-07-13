@@ -16,6 +16,37 @@ IntegerArithmetic >> confirmAbout: aString [
 	UIManager default confirm: aString label: 'Результати обчислень'
 ]
 
+{ #category : 'api - running' }
+IntegerArithmetic >> digitsAverage [
+	"Парадний метод обчислення середнього арифметичного цифр заданого числа"
+
+	| givenNumber result pharoResult |
+	givenNumber := self inputNatural.
+	result := self digitsAverageOf: givenNumber.
+	pharoResult := self pharoDigitsAverageOf: givenNumber.
+	self informAbout:
+	   '*** Обчислення середнього арифметичного цифр заданого числа'
+		, String cr, 'задане число = ' , givenNumber printString
+		, '   середнє = '	, result printString
+		, String cr, '  середнє засобами Pharo = ', pharoResult printString
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> digitsAverageOf: aNatural [
+	"Обчислює середнє арифметичне цифр натурального числа"
+
+	| restOfDigits rightmostDigit sum digitsQuantity |
+	restOfDigits := aNatural.
+	sum := 0.
+	digitsQuantity := 0.
+	[ restOfDigits > 0 ] whileTrue: [
+		rightmostDigit := restOfDigits \\ 10.
+		sum := sum + rightmostDigit.
+		digitsQuantity := digitsQuantity + 1.
+		restOfDigits := restOfDigits // 10 ].
+	^ sum / digitsQuantity
+]
+
 { #category : 'output' }
 IntegerArithmetic >> informAbout: aString [
 	"Повідомляє результат у інформційному вікні, що закривається автоматично"
@@ -31,4 +62,11 @@ IntegerArithmetic >> inputNatural [
 		   request: 'Введіть натуральне число'
 		   initialAnswer: '1'
 		   title: 'Запит') asInteger abs
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> pharoDigitsAverageOf: aNatural [
+	"Обчислює середнє арифметичне цифр натурального числа вбудованими засобами"
+
+	^ aNatural digitSum / aNatural decimalDigitLength
 ]
