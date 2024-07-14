@@ -17,15 +17,31 @@ IntegerArithmetic class >> runTasks [
 	answer := UIManager default
 		          chooseFrom:
 			          #( 'Середнє арифметичне цифр' 'Чи є паліндром'
-			             'Перевірка гіпотези Безу' 'Завершити' )
+			             'Перевірка гіпотези Безу' 'Надрукувати в (2) і (16) системі' )
 		          values:
-		          #( digitsAverage isPalindrome checkBezuHypothesis
-		             quit )
-		          lines: #( 3 )
+		          #( digitsAverage isPalindrome checkBezuHypothesis printWithNewBase )
+		          lines: #()
 		          title: 'Оберіть задачу'.
-	answer == #quit ifFalse: [
+	answer ifNotNil: [
 		self new perform: answer.
 		self runTasks ]
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> binaryStrOf: aNumber [
+	"Будує рядок - двійковий запис заданого числа"
+
+	| givenNumber binaryArr k |
+	givenNumber := aNumber.
+	k := givenNumber numberOfDigitsInBase: 2.
+	binaryArr := Array new: k.
+	[ givenNumber > 0 ] whileTrue: [
+		(givenNumber \\ 2) even
+			ifTrue: [ binaryArr at: k put: $0 ]
+			ifFalse: [ binaryArr at: k put: $1 ].
+		givenNumber := givenNumber // 2.
+		k := k - 1 ].
+	^ String withAll: binaryArr
 ]
 
 { #category : 'api - running' }
@@ -109,6 +125,21 @@ IntegerArithmetic >> digitsAverageOf: aNatural [
 	^ sum / digitsQuantity
 ]
 
+{ #category : 'calculation' }
+IntegerArithmetic >> hexadecimalStrOf: aNumber [
+	"Будує рядок - двійковий запис заданого числа"
+
+	| givenNumber hexaArr k |
+	givenNumber := aNumber.
+	k := givenNumber numberOfDigitsInBase: 16.
+	hexaArr := Array new: k.
+	[ givenNumber > 0 ] whileTrue: [
+		hexaArr at: k put: (Character digitValue: givenNumber \\ 16).
+		givenNumber := givenNumber // 16.
+		k := k - 1 ].
+	^ String withAll: hexaArr
+]
+
 { #category : 'output' }
 IntegerArithmetic >> informAbout: aString [
 	"Повідомляє результат у інформційному вікні, що закривається автоматично"
@@ -170,6 +201,67 @@ IntegerArithmetic >> pharoDigitsAverageOf: aNatural [
 	"Обчислює середнє арифметичне цифр натурального числа вбудованими засобами"
 
 	^ aNatural digitSum / aNatural decimalDigitLength
+]
+
+{ #category : 'api - running' }
+IntegerArithmetic >> printWithNewBase [
+	"Будує різними способами зображення заданого числа у (2) і (16) системах числення"
+
+	| givenNumber binNum binStr hexStr generalResult pharoResult text |
+	givenNumber := self inputNatural.
+	binNum := self pseudoBinaryOf: givenNumber.
+	binStr := self binaryStrOf: givenNumber.
+	hexStr := self hexadecimalStrOf: givenNumber.
+	pharoResult := (givenNumber printStringBase: 2), '  ', (givenNumber printStringBase: 16).
+	generalResult := (self recordStrOf: givenNumber withBase: 2), '  ',
+		(self recordStrOf: givenNumber withBase: 16).
+	"self informAbout:
+		'*** Запис заданого числа у (2) та (16) системах числення'
+		, String cr , 'задане число = ' , givenNumber printString
+		, '  двійковий аналог = ' , binNum printString , String cr
+		, '  двійковий рядок = ' , binStr, String cr
+		, '  шістнадцятковий рядок = ' , hexStr, String cr
+		, ' загальний метод: ', generalResult, String cr
+		, '    засоби Pharo: ', pharoResult"
+	text := WriteStream with: String new.
+	text nextPutAll: '*** Запис заданого числа у (2) та (16) системах числення'; cr;
+		nextPutAll: 'задане число = ' ; print: givenNumber; cr;
+		nextPutAll: 'двійковий аналог = '; print: binNum; cr;
+		nextPutAll: 'двійковий рядок = '; nextPutAll: binStr; cr;
+		nextPutAll: 'шістнадцятковий рядок = ';nextPutAll: hexStr; cr;
+		nextPutAll: 'загальний метод: ';nextPutAll: generalResult; cr;
+		nextPutAll: 'засоби Pharo: '; nextPutAll: pharoResult.
+	self showWindowLabeled: 'Запис числа різними засобами' with: text contents
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> pseudoBinaryOf: aNumber [
+	"Імітує двійковий запис заданого числа: будує нове ціле, до запису якого входять лише 0 і 1"
+
+	| givenNumber binaryNumber powerOf10 |
+	givenNumber := aNumber.
+	binaryNumber := 0.
+	powerOf10 := 1.
+	[ givenNumber > 0 ] whileTrue: [
+		binaryNumber := binaryNumber + (givenNumber \\ 2 * powerOf10).
+		givenNumber := givenNumber // 2.
+		powerOf10 := powerOf10 * 10 ].
+	^ binaryNumber
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> recordStrOf: aNumber withBase: base [
+	"Будує рядок - двійковий запис заданого числа"
+
+	| givenNumber hexaArr k |
+	givenNumber := aNumber.
+	k := givenNumber numberOfDigitsInBase: base.
+	hexaArr := Array new: k.
+	[ givenNumber > 0 ] whileTrue: [
+		hexaArr at: k put: (Character digitValue: givenNumber \\ base).
+		givenNumber := givenNumber // base.
+		k := k - 1 ].
+	^ String withAll: hexaArr
 ]
 
 { #category : 'calculation' }
