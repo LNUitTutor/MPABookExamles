@@ -9,6 +9,25 @@ Class {
 	#tag : 'Chapter01'
 }
 
+{ #category : 'as yet unclassified' }
+IntegerArithmetic class >> runTasks [
+
+	<script>
+	| answer |
+	answer := UIManager default
+		          chooseFrom:
+			          #( 'Середнє арифметичне цифр' 'Чи є паліндром'
+			             'Перевірка гіпотези Безу' 'Завершити' )
+		          values:
+		          #( digitsAverage isPalindrome checkBezuHypothesis
+		             quit )
+		          lines: #( 3 )
+		          title: 'Оберіть задачу'.
+	answer == #quit ifFalse: [
+		self new perform: answer.
+		self runTasks ]
+]
+
 { #category : 'api - running' }
 IntegerArithmetic >> checkBezuHypothesis [
 	"Перевіряє гіпотезу Безу для всіх цілих з проміжку [a; b].
