@@ -9,6 +9,49 @@ Class {
 	#tag : 'Chapter01'
 }
 
+{ #category : 'api - running' }
+IntegerArithmetic >> checkBezuHypothesis [
+	"Перевіряє гіпотезу Безу для всіх цілих з проміжку [a; b].
+ До кожного з чисел застосовує не більше за k перетворень."
+
+	| a b k inpt text res |
+	inpt := self inputThreeNaturals.
+	a := inpt at: 1.
+	b := inpt at: 2.
+	k := inpt at: 3.
+	a > b ifTrue: [ ^ self confirmAbout:
+		'Введено неправильні межі проміжка [' , a printString , '; ', b printString , ']' ].
+	text := WriteStream with: (String new).
+	a to: b do: [ :aNumber |
+		res := self checkHipothesisFor: aNumber untilTimes: k.
+		text
+			nextPutAll: 'Для числа '; print: aNumber;
+			nextPutAll: ' за '; print: (res at: 2);
+			nextPutAll: ' крок(и) '.
+		(res at: 1)
+			ifTrue: [ text
+					nextPutAll: 'отримано паліндром ';
+					print: (res at: 3); cr ]
+			ifFalse: [ text
+					nextPutAll: 'гіпотеза не виконується'; cr ] ].
+	self showWindowLabeled: 'Результати перевірки гіпотези Безу' with: text contents
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> checkHipothesisFor: aNumber untilTimes: k [
+	"Перевіряє гіпотезу Безу для заданого цілого. Виконує не більше за k перетворень."
+
+	| direct reversed counter |
+	direct := aNumber.
+	reversed := 0.
+	counter := 0.
+	[ 	direct := direct + reversed.
+	   reversed := self reverseNumber: direct.
+	   counter := counter + 1.
+	   reversed ~= direct and: [ counter <= k ] ] whileTrue.
+   ^ { reversed = direct . counter . reversed }
+]
+
 { #category : 'output' }
 IntegerArithmetic >> confirmAbout: aString [
 	"Повідомляє результат у модальному вікні, закрити його можна довільною кнопкою"
@@ -64,6 +107,16 @@ IntegerArithmetic >> inputNatural [
 		   title: 'Запит') asInteger abs
 ]
 
+{ #category : 'input' }
+IntegerArithmetic >> inputThreeNaturals [
+	"Відкриває вікно діалогу для введення трьох цілих чисел. Не виконує ніяких перевірок"
+
+	^ ((UIManager default
+		   request: 'Введіть три натуральних числа, відокремлених пропуском: a, b, k, a<=b'
+		   initialAnswer: '10 20 5'
+		   title: 'Запит') splitOn: Character space) collect: [ :each | each asInteger abs]
+]
+
 { #category : 'api - running' }
 IntegerArithmetic >> isPalindrome [
 	"Парадний метод для перевірки, чи задане число паліндром"
@@ -98,4 +151,29 @@ IntegerArithmetic >> pharoDigitsAverageOf: aNatural [
 	"Обчислює середнє арифметичне цифр натурального числа вбудованими засобами"
 
 	^ aNatural digitSum / aNatural decimalDigitLength
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> reverseNumber: anInteger [
+	"Будує натуральне число, чий десятковий запис є оберненим записом заданого числа"
+
+	| result restOfDigits |
+	result := 0.
+	restOfDigits := anInteger.
+	[ restOfDigits > 0 ] whileTrue: [
+		result := result * 10 + (restOfDigits \\ 10).
+		restOfDigits := restOfDigits // 10 ].
+	^ result 
+]
+
+{ #category : 'output' }
+IntegerArithmetic >> showWindowLabeled: labelString with: text [
+	"Відкриває окреме текстове вікно з об'ємними результатами"
+
+	(SystemWindow labelled: labelString)
+		addMorph: (RubScrolledTextMorph new
+				 setText: text;
+				 yourself)
+		frame: (0 @ 0 corner: 1 @ 1);
+		openInWorld
 ]
