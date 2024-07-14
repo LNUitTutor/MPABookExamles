@@ -16,10 +16,10 @@ IntegerArithmetic class >> runTasks [
 	| answer |
 	answer := UIManager default
 		          chooseFrom:
-			          #( 'Середнє арифметичне цифр' 'Чи є паліндром'
-			             'Перевірка гіпотези Безу' 'Надрукувати в (2) і (16) системі' )
+			          #( 'Середнє арифметичне цифр' 'Чи є паліндром' 'Перевірка гіпотези Безу'
+			             'Надрукувати в (2) і (16) системі' 'Розклад на прості множники' )
 		          values:
-		          #( digitsAverage isPalindrome checkBezuHypothesis printWithNewBase )
+		          #( digitsAverage isPalindrome checkBezuHypothesis printWithNewBase primeFactorization )
 		          lines: #()
 		          title: 'Оберіть задачу'.
 	answer ifNotNil: [
@@ -201,6 +201,77 @@ IntegerArithmetic >> pharoDigitsAverageOf: aNatural [
 	"Обчислює середнє арифметичне цифр натурального числа вбудованими засобами"
 
 	^ aNatural digitSum / aNatural decimalDigitLength
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> primeBetterDecompositionOf: anInteger [
+	"Дещо кращий розклад на прості множники: перебираємо дільники, перевіряємо, чи є вони простими числами"
+
+	| decomposition |
+	decomposition := WriteStream with: Array new.
+	2 to: anInteger do: [ :divider |
+		| divTimes |
+		(anInteger \\ divider = 0 and: [ divider isPrime ])
+		 ifTrue: [
+			divTimes := divider.
+			[ anInteger \\ divTimes = 0 ] whileTrue: [
+				decomposition nextPut: divider.
+				divTimes := divTimes * divider ] ] ].
+	^ decomposition contents
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> primeDecompositionOf: anInteger [
+	"Прямолінійний розклад на прості множники: перебираємо прості числа, перевіряємо, чи є вони дільниками"
+
+	| decomposition |
+	decomposition := WriteStream with: Array new.
+	2 to: anInteger do: [ :divider |
+		| divTimes |
+		divider isPrime ifTrue: [
+			divTimes := divider.
+			[ anInteger \\ divTimes = 0 ] whileTrue: [
+				decomposition nextPut: divider.
+				divTimes := divTimes * divider ] ] ].
+	^ decomposition contents
+]
+
+{ #category : 'api - running' }
+IntegerArithmetic >> primeFactorization [
+	"Різними способами розкладає задане число на прості множники"
+
+	| givenNumber decomp1 decomp2 decomp pharoDecomp text t1 t2 t pt |
+	givenNumber := self inputNatural.
+	t1 := [decomp1 := self primeDecompositionOf: givenNumber] millisecondsToRun.
+	t2 := [decomp2 := self primeBetterDecompositionOf: givenNumber] millisecondsToRun.
+	t := [decomp := self primeFactorsOf: givenNumber] millisecondsToRun.
+	pt := [pharoDecomp := givenNumber primeFactors] millisecondsToRun.
+
+	text := WriteStream with: String new.
+	text nextPutAll: '*** Розклад натурального числа на прості множники'; cr;
+		nextPutAll: 'задане число = ' ; print: givenNumber; cr;
+		nextPutAll: 'розклад "в лоб" '; print: decomp1;  nextPutAll: ' тривав (mSec) '; print: t1; cr;
+		nextPutAll: 'покращений розклад '; print: decomp2;  nextPutAll: ' тривав (mSec) '; print: t2; cr;
+		nextPutAll: 'оптимальний розклад '; print: decomp;  nextPutAll: ' тривав (mSec) '; print: t; cr;
+		nextPutAll: 'розклад засобами Pharo: '; print: pharoDecomp;  nextPutAll: ' тривав (mSec) '; print: pt.
+	self showWindowLabeled: 'Розклад на прості множники' with: text contents
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> primeFactorsOf: anInteger [
+	"Розклад на прості множники: перебираємо дільники, вилучаємо з числа, перевірка на простоту - зайва"
+
+	| decomposition givenNumber divider |
+	decomposition := WriteStream with: Array new.
+	givenNumber := anInteger.
+	divider := 2.
+	[ givenNumber > 1 ] whileTrue: [
+		givenNumber \\ divider = 0
+			ifTrue: [
+				decomposition nextPut: divider.
+				givenNumber := givenNumber // divider ]
+			ifFalse: [ divider := divider + 1 ] ].
+	^ decomposition contents
 ]
 
 { #category : 'api - running' }
