@@ -144,7 +144,7 @@ IntegerArithmetic >> hexadecimalStrOf: aNumber [
 IntegerArithmetic >> informAbout: aString [
 	"Повідомляє результат у інформційному вікні, що закривається автоматично"
 
-	UIManager default inform: aString
+	UIManager default message: aString title: 'Результати обчислень'
 ]
 
 { #category : 'input' }
