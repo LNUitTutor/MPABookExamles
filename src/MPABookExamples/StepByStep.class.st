@@ -9,6 +9,60 @@ Class {
 	#tag : 'Chapter02'
 }
 
+{ #category : 'as yet unclassified' }
+StepByStep class >> runTasks [
+
+	<script>
+	| answer |
+	answer := UIManager default
+		          chooseFrom:
+			          #( 'Середнє квадратичне послідовності чисел'
+							 'Середнє арифметичне послідовності, що закінчується нулем'
+							 'Таблиця значень тригонометричних функцій'
+							 'Зростаюча послідовність, обмежена заданим значенням'
+			             'Послідовність Фібоначчі до k-го члена'
+							 'Послідовності середніх арифметичних і геометричних')
+		          values:
+		          #( quadraticMean average buildTable succession fibonacci averageVSgeometricMean )
+		          lines: #()
+		          title: 'Оберіть задачу'.
+	answer ifNotNil: [
+		self new perform: answer.
+		self runTasks ]
+]
+
+{ #category : 'calculation' }
+StepByStep >> aveVSgeoOf: a and: b with: eps [
+	"Будує дві пов'язані послідовності з середніх арифметичних і середніх геометричних
+	 двох заданих чисел і їхніх середніх. Повертає форматований рядок."
+
+	| stream u v k |
+	stream := WriteStream on: String new.
+	stream
+		nextPutAll:
+			'*Побудова послідовностей середніх арифметичних і геометричних*'; cr; cr;
+		nextPutAll: '  k      x_k         y_k'; cr;
+		nextPutAll: '----------------------------'; cr.
+	u := a.
+	v := b.
+	k := 1.
+	self print: k on: stream width: 3;
+		print: u on: stream width: 12 digits: 6;
+		print: v on: stream width: 12 digits: 6.
+	stream cr.
+	[ (u - v) abs >= eps ] whileTrue: [ | p q |
+		k := k + 1.
+		p := u.
+		q := v.
+		u := (p + q) / 2.0.
+		v := (p * q) sqrt.
+		self print: k on: stream width: 3;
+			print: u on: stream width: 12 digits: 6;
+			print: v on: stream width: 12 digits: 6.
+		stream cr ].
+	^ stream contents
+]
+
 { #category : 'api - running' }
 StepByStep >> average [
 	"Обчислення середнього арифметичного послідовності чисел невідомого розміру.
@@ -38,6 +92,21 @@ StepByStep >> averageStopedBy: term [
 	 String cr, (quantity = 0
 		   ifTrue: [ 'Послідовність починається нулем' ]
 		   ifFalse: [ 'Середнє арифметичне = ', (sum / quantity) printString ])
+]
+
+{ #category : 'api - running' }
+StepByStep >> averageVSgeometricMean [
+	"Будує дві послідовності: x_1 = a, y_1 = b;
+	 x_k = (x_k-1 + y_k-1) / 2, yx_k = sqrt(x_k-1 * y_k-1), k = 2, 3, ...,
+	 до досягнення |x_k - y_k| < eps"
+
+	| givenNumbers result |
+	givenNumbers := self inputThreeFloats.
+	result := self
+		          aveVSgeoOf: (givenNumbers at: 1)
+		          and: (givenNumbers at: 2)
+		          with: (givenNumbers at: 3).
+	self showWindowLabeled: 'Числові послідовності середніх' with: result
 ]
 
 { #category : 'api - running' }
@@ -121,6 +190,21 @@ StepByStep >> inputSequenceOf: count [
 		   title: 'Запит'
 ]
 
+{ #category : 'input' }
+StepByStep >> inputThreeFloats [
+	"Відкриває вікно діалогу для введення трьох дійсних чисел. Не виконує ніяких перевірок"
+
+	| stream a b eps |
+	stream := (UIManager default
+		   request: 'Введіть три дійсних числа, відокремлених пропуском: a, b, eps, a<=b'
+		   initialAnswer: '1 100 1e-5'
+		   title: 'Запит') readStream.
+	a := Float readFrom: stream. stream next.
+	b := Float readFrom: stream. stream next.
+	eps := Float readFrom: stream.
+	^ { a . b. eps }
+]
+
 { #category : 'calculation' }
 StepByStep >> pharoFibonacciUpTo: k [
 	"Обчислює члени послідовності Фібоначчі від 0-го по k-й включно, k >=2 за допомогою генератора.
@@ -139,20 +223,28 @@ StepByStep >> pharoFibonacciUpTo: k [
 ]
 
 { #category : 'output' }
-StepByStep >> print: aNumber on: aStream width: w digits: d [
-	"Друкує число aNumber в потік aStream у полі шириною w з d значащими цифрами"
+StepByStep >> print: anInteger on: aStream width: w [
+	"Друкує число aFloat в потік aStream у полі шириною w з d значащими цифрами"
 
-	aNumber = 0.0
+	w - anInteger numberOfDigits timesRepeat: [ aStream nextPut: Character space ].
+	anInteger printOn: aStream
+]
+
+{ #category : 'output' }
+StepByStep >> print: aFloat on: aStream width: w digits: d [
+	"Друкує число aFloat в потік aStream у полі шириною w з d значащими цифрами"
+
+	aFloat = 0.0
 		ifTrue: [
 			w - d - 2 timesRepeat: [ aStream nextPut: Character space ].
 			aStream nextPutAll: '0.'.
 			d timesRepeat: [ aStream nextPut: $0 ] ]
 		ifFalse: [
 			w - d - 3 timesRepeat: [ aStream nextPut: Character space ].
-			aStream nextPut: (aNumber < 0
+			aStream nextPut: (aFloat < 0
 					 ifTrue: [ $- ]
 					 ifFalse: [ Character space ]).
-			aNumber abs absPrintOn: aStream base: 10 digitCount: d ]
+			aFloat abs absPrintOn: aStream base: 10 digitCount: d ]
 ]
 
 { #category : 'api - running' }
