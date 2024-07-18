@@ -49,6 +49,41 @@ StepByStep >> buildTable [
 		with: (self tabulateFor: 12)
 ]
 
+{ #category : 'api - running' }
+StepByStep >> fibonacci [
+	"Будує послідовність Фібоначчі від f_0 до f_k, де k - задане число."
+
+	| givenM result pharoResult |
+	givenM := self inputNatural.
+	result := self fibonacciUpTo: givenM.
+	self showWindowLabeled: 'Послідовність Фібоначчі' with: result.
+	pharoResult := self pharoFibonacciUpTo: givenM.
+	self showWindowLabeled: 'Послідовність Фібоначчі (Pharo)' with: pharoResult
+]
+
+{ #category : 'calculation' }
+StepByStep >> fibonacciUpTo: k [
+	"Обчислює члени послідовності Фібоначчі від 0-го по k-й включно, k >=2.
+    Повертає рядок з результатами."
+
+	| stream f_n f_n1 f_n2 |
+	stream := WriteStream on: String new.
+	stream
+		nextPutAll: '*Побудова послідовності чисел Фібоначчі*'; cr; cr;
+		nextPutAll: 'номер останнього: '; print: k; cr.
+	f_n1 := 1.
+	f_n2 := 1.
+	stream
+		nextPutAll: 'f(0) = '; print: f_n2; cr; nextPutAll: 'f(1) = '; print: f_n1; cr.
+	2 to: k do: [ :n |
+		f_n := f_n1 + f_n2.
+		f_n2 := f_n1.
+		f_n1 := f_n.
+		stream
+			nextPutAll: 'f('; 	print: n; nextPutAll: ') = '; print: f_n; cr. ].
+	^ stream contents
+]
+
 { #category : 'output' }
 StepByStep >> informAbout: aString [
 	"Повідомляє результат у інформаційному вікні, що закривається автоматично"
@@ -84,6 +119,23 @@ StepByStep >> inputSequenceOf: count [
 	^ UIManager default
 		   textEntry: 'Введіть послідовність', count printString, ' чисел, відокремлених пропуском'
 		   title: 'Запит'
+]
+
+{ #category : 'calculation' }
+StepByStep >> pharoFibonacciUpTo: k [
+	"Обчислює члени послідовності Фібоначчі від 0-го по k-й включно, k >=2 за допомогою генератора.
+    Повертає рядок з результатами."
+
+	| stream generator |
+	stream := WriteStream on: String new.
+	stream
+		nextPutAll: '*Побудова послідовності чисел Фібоначчі засобами Pharo*'; cr; cr;
+		nextPutAll: 'номер останнього: '; print: k; cr.
+	generator := GeneratorTest new fibonacciSequence.
+	0 to: k do: [ :n |
+		stream
+			nextPutAll: 'f('; 	print: n; nextPutAll: ') = '; print: generator next; cr. ].
+	^ stream contents
 ]
 
 { #category : 'output' }
@@ -140,6 +192,40 @@ StepByStep >> showWindowLabeled: labelString with: text [
 				 yourself)
 		frame: (0 @ 0 corner: 1 @ 1);
 		openInWorld
+]
+
+{ #category : 'api - running' }
+StepByStep >> succession [
+	"Будує зростаючу послідовність, знаходить перший член, що перевищує задане число."
+
+	| givenM result |
+	givenM := self inputNatural.
+	result := self successionUpTo: givenM.
+	self showWindowLabeled: 'Числова послідовність' with: result
+]
+
+{ #category : 'calculation' }
+StepByStep >> successionUpTo: m [
+	"Обчислює члени послідовності a_0 = 1; a_k = a_k-1 / k + 0.2 * k + 1, k = 1, 2, ...,
+ щоб досягти a_k > m. Повертає рядок з результатами."
+
+	| stream a k |
+	stream := WriteStream on: String new.
+	stream
+		nextPutAll: '*Побудова зростаючої числової послідовності*'; cr; cr;
+		nextPutAll: 'межа: '; print: m; cr.
+	k := 0.
+	a := 1.0.
+	stream
+		nextPutAll: 'a('; 	print: k; nextPutAll: ') = '; print: a; cr.
+	[ a <= m ] whileTrue: [ 
+		k := k + 1.
+		a := a / k + (0.2 * k) + 0.1.
+		stream
+			nextPutAll: 'a('; 	print: k; nextPutAll: ') = '; print: a; cr. ].
+	stream
+		nextPutAll: 'Знайдений номер = '; print: k; cr.
+	^ stream contents
 ]
 
 { #category : 'calculation' }
