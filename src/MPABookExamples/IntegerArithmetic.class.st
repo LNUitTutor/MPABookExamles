@@ -142,7 +142,7 @@ IntegerArithmetic >> hexadecimalStrOf: aNumber [
 
 { #category : 'output' }
 IntegerArithmetic >> informAbout: aString [
-	"Повідомляє результат у інформційному вікні, що закривається автоматично"
+	"Повідомляє результат у інформаційному вікні, що закривається автоматично"
 
 	UIManager default message: aString title: 'Результати обчислень'
 ]
@@ -355,6 +355,7 @@ IntegerArithmetic >> showWindowLabeled: labelString with: text [
 	(SystemWindow labelled: labelString)
 		addMorph: (RubScrolledTextMorph new
 				 setText: text;
+				 font: StandardFonts codeFont;
 				 yourself)
 		frame: (0 @ 0 corner: 1 @ 1);
 		openInWorld
