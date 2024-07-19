@@ -71,6 +71,61 @@ IterationWithBranching >> countProperAmong: n [
 	^ counter
 ]
 
+{ #category : 'api - running' }
+IterationWithBranching >> exchangeFirstWithMax [
+	"Міняє місцями в заданому масиві перший елемент з найбільшим"
+
+	| arr index indexEnum indexPharo stream max |
+	stream := String new writeStream.
+	arr := self inputArray.
+	stream
+		nextPutAll: '*** Обмін першого з найбільшим'; 	cr; cr;
+		nextPutAll: 'Заданий масив: '; print: arr; 	cr.
+	index := self indexOfMax: arr.
+	indexEnum := self indexOfMaxEnumerating: arr.
+	indexPharo := self indexOfMaxPharo: arr.
+	index ~= 1 ifTrue: [ 
+		max := arr at: index.
+		arr at: index put: arr first.
+		arr at: 1 put: max ].
+	stream
+		nextPutAll: ' - індекс найбільшого елемента: '; print: index; cr;
+		nextPutAll: ' - індекс за допомогою ітератора: '; print: indexEnum; cr;
+		nextPutAll: ' - індекс засобами Pharo: '; print: indexPharo; cr;
+		nextPutAll: 'Перетворений масив: '; print: arr.
+	self showWindowLabeled: 'Обмін елементів масиву' with: stream contents
+]
+
+{ #category : 'calculation' }
+IterationWithBranching >> indexOfMax: anArray [
+	"Знаходить індекс першого максимального елемента масиву"
+
+	| index |
+	index := 1.
+	2 to: anArray size do: [ :i |
+		(anArray at: i) > (anArray at: index) ifTrue: [ index := i ] ].
+	^ index
+]
+
+{ #category : 'calculation' }
+IterationWithBranching >> indexOfMaxEnumerating: anArray [
+	"Знаходить індекс першого максимального елемента масиву"
+
+	| index maxValue |
+	index := 1.
+	maxValue := anArray first.
+	anArray withIndexDo: [ :elem :i |
+		elem > maxValue ifTrue: [ index := i. maxValue := elem ] ].
+	^ index
+]
+
+{ #category : 'calculation' }
+IterationWithBranching >> indexOfMaxPharo: anArray [
+	"Знаходить індекс першого максимального елемента масиву"
+
+	^ anArray indexOf: anArray max
+]
+
 { #category : 'output' }
 IterationWithBranching >> informAbout: aString [
 	"Повідомляє результат у інформаційному вікні, що закривається автоматично"
