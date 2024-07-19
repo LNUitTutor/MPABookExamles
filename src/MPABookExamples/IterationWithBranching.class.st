@@ -9,6 +9,12 @@ Class {
 	#tag : 'Chapter03'
 }
 
+{ #category : 'constants' }
+IterationWithBranching class >> sizeOfArray [
+
+	^ 10
+]
+
 { #category : 'calculation' }
 IterationWithBranching >> check: anArray inCircle: r [
 	"Перевіряє, скільки точок (a_i;a_n-i+1) належать кругові з центром (0;0) і радіусом r."
@@ -96,6 +102,22 @@ IterationWithBranching >> exchangeFirstWithMax [
 	self showWindowLabeled: 'Обмін елементів масиву' with: stream contents
 ]
 
+{ #category : 'api - running' }
+IterationWithBranching >> ifIsGrowing [
+	"Перевіряє, чи заданий масив впорядковано за зростанням"
+
+	| arr n last |
+	n := self class sizeOfArray.
+	arr := self inputArray: n.
+	last := self untilIsGrowing: arr.
+	self informAbout:
+		'*** Перевірка, чи впорядкована послідовність' , String cr
+		, arr printString , String cr , (last > n
+			 ifTrue: [ 'Послідовність зростаюча' ]
+			 ifFalse: [ 'Умову впорядкованості порушено перед а[' , last printString
+					, ']' ])
+]
+
 { #category : 'calculation' }
 IterationWithBranching >> indexOfMax: anArray [
 	"Знаходить індекс першого максимального елемента масиву"
@@ -137,8 +159,14 @@ IterationWithBranching >> informAbout: aString [
 IterationWithBranching >> inputArray [
 	"Отримує від користувача розмір масиву і його значення, повертає створений масив."
 
-	| n arr stream |
-	n := self inputNatural.
+	^ self inputArray: (self inputNatural)
+]
+
+{ #category : 'input' }
+IterationWithBranching >> inputArray: n [
+	"Отримує від користувача n значень елементів масиву, повертає створений масив."
+
+	| arr stream |
 	arr := Array new: n.
 	stream := (self inputSequenceOf: n) readStream.
 	1 to: n do: [ :i |
@@ -198,4 +226,16 @@ IterationWithBranching >> showWindowLabeled: labelString with: text [
 				 yourself)
 		frame: (0 @ 0 corner: 1 @ 1);
 		openInWorld
+]
+
+{ #category : 'calculation' }
+IterationWithBranching >> untilIsGrowing: anArray [
+	"Знаходить індекс закінчення зростаючої частини масиву"
+
+	| i n |
+	n := anArray size.
+	i := 2.
+	[ i <= n and: [ (anArray at: i - 1) < (anArray at: i) ] ] whileTrue: [
+		i := i + 1 ].
+	^ i
 ]
