@@ -9,10 +9,66 @@ Class {
 	#tag : 'Chapter03'
 }
 
+{ #category : 'accessing - ui' }
+IterationWithBranching class >> runTasks [
+
+	<script>
+	| answer |
+	answer := UIManager default
+		          chooseFrom:
+			          #( 'Скільки є "правильних" серед усіх заданих'
+							 'Скільки точок потрапляє в круг'
+							 'Максимальний елемент послідовності'
+							 'Перевірка впорядкованості'
+							 'Пошук місця елемента послідовності' )
+		          values:
+		          #( countProper checkArrInCircle exchangeFirstWithMax ifIsGrowing insertion )
+		          lines: #()
+		          title: 'Оберіть задачу'.
+	answer ifNotNil: [
+		self new perform: answer.
+		self runTasks ]
+]
+
 { #category : 'constants' }
 IterationWithBranching class >> sizeOfArray [
 
 	^ 10
+]
+
+{ #category : 'calculation' }
+IterationWithBranching >> backwardSearch: aNumber insertInto: anArray [
+	"Вставляє aNumber у впорядкований anArray так, щоб не порушити впорядкованості.
+ Пошук місця розпочинає з кінця, одночасно посуває елементи масиву."
+
+	| arr n comparisonPlace |
+	arr := anArray copyWith: nil.
+	n := anArray size.
+	comparisonPlace := n.
+	[ comparisonPlace >= 1 and: [ (arr at: comparisonPlace) > aNumber ] ]
+		whileTrue: [ arr at: comparisonPlace + 1 put: (arr at: comparisonPlace).
+			comparisonPlace := comparisonPlace - 1 ].
+	arr at: comparisonPlace + 1 put: aNumber.
+	^ arr
+]
+
+{ #category : 'calculation' }
+IterationWithBranching >> binarySearch: aNumber insertInto: anArray [
+	"Вставляє aNumber у впорядкований anArray так, щоб не порушити впорядкованості.
+ Щоб знайти місце, застосовує бінарний пошук, тоді посуває хвіст."
+
+	| arr n left right |
+	arr := anArray copyWith: nil.
+	n := anArray size.
+	left := 1.
+	right := n + 1.
+	[ left ~= right ] whileTrue: [ | middle |
+		middle := (left + right) // 2.
+		(arr at: middle) < aNumber ifTrue: [ left := middle + 1 ] ifFalse: [ right := middle ] ].
+	n to: left by: -1 do: [ :i |
+		arr at: i + 1 put: (arr at: i) ].
+	arr at: left put: aNumber.
+	^ arr
 ]
 
 { #category : 'calculation' }
@@ -100,6 +156,23 @@ IterationWithBranching >> exchangeFirstWithMax [
 		nextPutAll: ' - індекс засобами Pharo: '; print: indexPharo; cr;
 		nextPutAll: 'Перетворений масив: '; print: arr.
 	self showWindowLabeled: 'Обмін елементів масиву' with: stream contents
+]
+
+{ #category : 'calculation' }
+IterationWithBranching >> forwardSearch: aNumber insertInto: anArray [
+	"Вставляє aNumber у впорядкований anArray так, щоб не порушити впорядкованості.
+ Шукає місце переглядом зліва направо, тоді посуває хвіст."
+
+	| arr n insertionPlace |
+	arr := anArray copyWith: nil.
+	n := anArray size.
+	insertionPlace := 1.
+	[ insertionPlace <= n and: [ (arr at: insertionPlace) < aNumber ] ]
+		whileTrue: [ insertionPlace := insertionPlace + 1 ].
+	n to: insertionPlace by: -1 do: [ :i |
+		arr at: i + 1 put: (arr at: i) ].
+	arr at: insertionPlace put: aNumber.
+	^ arr
 ]
 
 { #category : 'api - running' }
@@ -213,6 +286,28 @@ IterationWithBranching >> inputSequenceOf: count [
 	^ UIManager default
 		   textEntry: 'Введіть послідовність ', count printString, ' чисел, відокремлених пропуском'
 		   title: 'Запит'
+]
+
+{ #category : 'api - running' }
+IterationWithBranching >> insertion [
+	"Вставляє задане значення val в заданий масив arr, впорядкований за зростанням"
+
+	| arr val n forwardArr backwardArr binaryArr stream |
+	n := self class sizeOfArray.
+	arr := (self inputArray: n) sorted.
+	val := self inputFloatLabeled: 'Задайте число, яке потрібно вставити в масив'.
+	forwardArr := self forwardSearch: val insertInto: arr.
+	backwardArr := self backwardSearch: val insertInto: arr.
+	binaryArr := self binarySearch: val insertInto: arr.
+	stream := String new writeStream.
+	stream
+		nextPutAll: '*** Вставка числа у впорядковану послідовність'; cr;
+		nextPutAll: ' - заданий масив: '; print: arr; cr;
+		nextPutAll: ' -  задане число: '; print: val; cr; cr;
+		nextPutAll: 'пошук від початку: '; print: forwardArr; cr;
+		nextPutAll: '  пошук від кінця: '; print: backwardArr; cr;
+		nextPutAll: '  двійковий пошук: '; print: binaryArr; cr.
+	self showWindowLabeled: 'Результати вставляння числа' with: stream contents
 ]
 
 { #category : 'output' }
