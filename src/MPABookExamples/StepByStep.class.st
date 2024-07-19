@@ -181,16 +181,6 @@ StepByStep >> inputNthNumber: n [
 ]
 
 { #category : 'input' }
-StepByStep >> inputSequenceOf: count [
-	"Відкриває вікно діалогу для введення послідовності count чисел. Повертає рядок.
-	 Не виконує ніяких перевірок"
-
-	^ UIManager default
-		   textEntry: 'Введіть послідовність', count printString, ' чисел, відокремлених пропуском'
-		   title: 'Запит'
-]
-
-{ #category : 'input' }
 StepByStep >> inputThreeFloats [
 	"Відкриває вікно діалогу для введення трьох дійсних чисел. Не виконує ніяких перевірок"
 
