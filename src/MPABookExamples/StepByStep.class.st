@@ -9,7 +9,7 @@ Class {
 	#tag : 'Chapter02'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'accessing - ui' }
 StepByStep class >> runTasks [
 
 	<script>

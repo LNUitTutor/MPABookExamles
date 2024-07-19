@@ -9,7 +9,7 @@ Class {
 	#tag : 'Chapter01'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'accessing - ui' }
 IntegerArithmetic class >> runTasks [
 
 	<script>
