@@ -20,10 +20,26 @@ Class {
 }
 
 { #category : 'calculation' }
-NestedLoops >> buildUnitaryArray2D: n [
-	"Створює масив масивів, одиничну матрицю порядку n."
+NestedLoops >> buildTriangleMatrix: n [
+	"Створює масив масивів, верхньотрикутну матрицю порядку n, розділену побічною діагоналлю."
 
-	^ CTArray2D width: n height: n tabulate: [ :i :j | (i = j) asInteger ]
+	| matrix |
+	matrix := self createMatrix: n.
+	1 to: n do: [ :i | (matrix at: i) at: n - i + 1 put: n ].
+	1 to: n - 1 do: [ :i |
+		1 to: n - i do: [ :j |
+			(matrix at: i) at: j put: i + j - 1 ] ].
+	2 to: n do: [ :i |
+		n - i + 2 to: n do: [ :j |
+			(matrix at: i) at: j put: 0 ] ].
+	^ matrix
+]
+
+{ #category : 'calculation' }
+NestedLoops >> buildUnitaryArray2D: n [
+	"Створює двохвимірний масив, одиничну матрицю порядку n, за допомогою конструктора."
+
+	^ CTArray2D width: n height: n tabulate: [ :i :j | i = j ifTrue: [ 1 ] ifFalse: [ 0 ] ]
 ]
 
 { #category : 'calculation' }
@@ -52,7 +68,7 @@ NestedLoops >> createMatrix: n [
 
 { #category : 'calculation' }
 NestedLoops >> fillUnitaryArray2D: n [
-	"Створює масив масивів, одиничну матрицю порядку n."
+	"Створює двохвимірний масив, одиничну матрицю порядку n, послідовним заповненням."
 
 	| matrix curr n2 |
 	matrix := CTArray2D width: n height: n.
@@ -93,6 +109,28 @@ aMatrix do: [ :row |
 	aStream cr ]
 ]
 
+{ #category : 'calculation' }
+NestedLoops >> refillTriangleArray2D: n [
+	"Створює двохвимірний масив, верхньотрикутну матрицю порядку n."
+
+	| matrix |
+	matrix := (CTArray2D width: n height: n) atAllPut: 0.
+	n to: 1 by: -1 do: [ :i | 
+		1 to: i do: [ :j |
+			matrix at: (i + 1 - j) @ j put: i ] ].
+	^ matrix
+]
+
+{ #category : 'calculation' }
+NestedLoops >> refillUnitaryArray2D: n [
+	"Створює двохвимірний масив, одиничну матрицю порядку n."
+
+	| matrix |
+	matrix := (CTArray2D width: n height: n) atAllPut: 0.
+	1 to: n do: [ :i | matrix at: i @ i put: 1 ].
+	^ matrix
+]
+
 { #category : 'output' }
 NestedLoops >> showWindowLabeled: labelString with: text [
 	"Відкриває окреме текстове вікно з об'ємними результатами"
@@ -110,17 +148,20 @@ NestedLoops >> showWindowLabeled: labelString with: text [
 NestedLoops >> unitaryMatrix [
 "Задано натуральне n. Побудувати і надрукувати одиничну матрицю n-го порядку.
  Задачу розв'язано різними способами: побудовано масив масивів і екземпляри CTArray2D."
-| n matrix arr2Dbuild arr2Dfill |
+| n matrix arr2Dbuild arr2Dfill arr2Drefill |
 n := self inputNatural.
 matrix := self buildUnitaryMatrix: n.
 arr2Dbuild := self buildUnitaryArray2D: n.
 arr2Dfill := self fillUnitaryArray2D: n.
+arr2Drefill := self refillUnitaryArray2D: n.
 self showWindowLabeled: 'Одинична матриця' with: 
 	( String streamContents: [ :stream |
 		stream nextPutAll: 'Побудова одиничної матриці заданого розміру (за структурою)'; cr.
 		self printMatrix: matrix on: stream.
-		stream cr; cr; nextPutAll: 'Побудова двохвимірного масиву табуляцією (з перевірками)'; cr.
+		stream cr; nextPutAll: 'Побудова двохвимірного масиву табуляцією (з перевірками)'; cr.
 		arr2Dbuild printGridOn: stream.
-		stream cr; cr; nextPutAll: 'Побудова двохвимірного масиву заповненням пам''яті'; cr.
-		arr2Dfill printGridOn: stream ] )
+		stream cr; nextPutAll: 'Побудова двохвимірного масиву заповненням пам''яті'; cr.
+		arr2Dfill printGridOn: stream.
+		stream cr.
+		arr2Drefill printGridOn: stream ] )
 ]
