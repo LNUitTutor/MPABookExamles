@@ -214,7 +214,7 @@ StepByStep >> pharoFibonacciUpTo: k [
 
 { #category : 'output' }
 StepByStep >> print: anInteger on: aStream width: w [
-	"Друкує число aFloat в потік aStream у полі шириною w з d значащими цифрами"
+	"Друкує число anInteger в потік aStream у полі шириною w, ліву частину заповнює пропусками."
 
 	w - anInteger numberOfDigits timesRepeat: [ aStream nextPut: Character space ].
 	anInteger printOn: aStream
