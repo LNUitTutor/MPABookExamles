@@ -92,6 +92,23 @@ NestedLoops >> inputNatural [
 		   title: 'Запит') asInteger abs
 ]
 
+{ #category : 'calculation' }
+NestedLoops >> matrixFromSequence: anArray [
+	"Заповнює матрицю змійкою значеннями заданої послідовності.
+ Використано відображення індексів елемента матриці на індекс елемента послідовності"
+
+	| n matrix k |
+	n := anArray size sqrt.
+	matrix := self createMatrix: n.
+	1 to: n do: [ :j |
+		j even
+			ifTrue: [ k := j * n + 1.
+				1 to: n do: [ :i | (matrix at: i) at: j put: ( anArray at: k - i ) ] ]
+			ifFalse: [ k := (j - 1) * n.
+				1 to: n do: [ :i | (matrix at: i) at: j put: ( anArray at: k + i ) ] ] ].
+	^ matrix
+]
+
 { #category : 'printing' }
 NestedLoops >> print: anInteger on: aStream width: w [
 	"Друкує число anInteger в потік aStream у полі шириною w, ліву частину заповнює пропусками."
@@ -131,6 +148,36 @@ NestedLoops >> refillUnitaryArray2D: n [
 	^ matrix
 ]
 
+{ #category : 'calculation' }
+NestedLoops >> sequenceToArray2D: anArray [
+	"Вкладає послідовність у матрицю змійкою. Використано можливості
+	 класу CTArray2D звертатися відразу до цілих рядків."
+
+	| n arr2d |
+	n := anArray size sqrt.
+	arr2d := CTArray2D fromArray: anArray width: n.
+	2 to: n by: 2 do: [ :row | arr2d atRow: row put: (arr2d atRow: row) reversed ].
+	^ self transposeArray2D: arr2d
+]
+
+{ #category : 'calculation' }
+NestedLoops >> sequenceToMatrix: anArray [
+	"Вкладає послідовність у матрицю змійкою. Використано відображення
+	 індексу елемента послідовності на індекси елемента матриці."
+
+	| n matrix i j step |
+	n := anArray size sqrt.
+	matrix := self createMatrix: n.
+	i := 1.
+	j := 1.
+	step := 1.
+	anArray doWithIndex: [ :each :k | (matrix at: i) at: j put: each.
+		k \\ n = 0
+			ifTrue: [ j := j + 1. step := step negated ]
+			ifFalse: [ i := i + step ] ].
+	^ matrix
+]
+
 { #category : 'output' }
 NestedLoops >> showWindowLabeled: labelString with: text [
 	"Відкриває окреме текстове вікно з об'ємними результатами"
@@ -142,6 +189,55 @@ NestedLoops >> showWindowLabeled: labelString with: text [
 				 yourself)
 		frame: (0 @ 0 corner: 1 @ 1);
 		openInWorld
+]
+
+{ #category : 'api - running' }
+NestedLoops >> snakeMatrix [
+	"Вкладає 'змійкою' послідовність n^2 чисел у квадратну матрицю nxn.
+ Побудову виконано різними способами."
+
+	| sequence matrix1 matrix2 arr2d n str |
+	n := self inputNatural.
+	sequence := (1 to: n squared) asArray.
+	matrix1 := self matrixFromSequence: sequence.
+	matrix2 := self sequenceToMatrix: sequence.
+	arr2d := self sequenceToArray2D: sequence.
+	str := String streamContents: [ :stream |
+		stream nextPutAll: '*Заповнення матриці "змійкою" заданими значеннями*'; cr.
+		self printMatrix: matrix1 on: stream.
+		stream nextPutAll: '*Вкладення "змійкою" послідовності в матрицю*'; cr.
+		self printMatrix: matrix2 on: stream.
+		stream nextPutAll: '*Вкладення послідовності в двовимірний масив, побудова змійки*'; cr.
+		arr2d printGridOn: stream ].
+	self showWindowLabeled: 'Матриця, заповнена змійкою' with: str
+]
+
+{ #category : 'calculation' }
+NestedLoops >> transposeArray2D: anArray2D [
+	"Будує транспоновану матрицю"
+
+	| trArray2D |
+	trArray2D := CTNewArray2D width: anArray2D height height: anArray2D width.
+	1 to: anArray2D height do: [ :i |
+		trArray2D atColumn: i put: (anArray2D atRow: i) ].
+	^ trArray2D
+]
+
+{ #category : 'api - running' }
+NestedLoops >> triangleMatrix [
+	"Будує верхньотрикутну квадратну матрицю nxn. На побічній діагоналі та паралельних до неї
+ розташовано постійні величини. Побудову виконано різними способами."
+
+	| matrix arr2d n str |
+	n := self inputNatural.
+	matrix := self buildTriangleMatrix: n.
+	arr2d := self refillTriangleArray2D: n.
+	str := String streamContents: [ :stream |
+		stream nextPutAll: '*Побудова трикутної матриці заданого розміру*'; cr.
+		self printMatrix: matrix on: stream.
+		stream nextPutAll: '*Побудова трикутної матриці в двовимірному масиві*'; cr.
+		arr2d printGridOn: stream ].
+	self showWindowLabeled: 'Трикутна матриця' with: str
 ]
 
 { #category : 'api - running' }
