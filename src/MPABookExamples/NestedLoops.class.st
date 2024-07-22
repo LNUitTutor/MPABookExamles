@@ -67,6 +67,48 @@ NestedLoops >> createMatrix: n [
 ]
 
 { #category : 'calculation' }
+NestedLoops >> economicArrSumming: anArray2D [
+	"За заданою квадратною матрицею, двохвимірним масивом anArray2D, будує нову, чиї елементи є сумами
+	 відповідних прямокутних ділянок заданої матриці. Індекси (i,j) елемента задають координати лівого
+	 нижнього кута ділянки.  Для обчислення нових елементів використано обчислені значення попередніх."
+
+	| n bArray2D |
+	n := anArray2D width.
+	bArray2D := CTArray2D width: n height: n.
+	bArray2D at: n @ 1 put: (anArray2D at: n @ 1 ).
+	2 to: n do: [ :i |
+		bArray2D atX: n atY: i put: ((bArray2D atX: n atY: i - 1) + (anArray2D atX: n atY: i)) ].
+	n - 1 to: 1 by: -1 do: [ :j |
+		| s |
+		s := 0.
+		1 to: n do: [ :i |
+			s := s + (anArray2D atX: j atY: i).
+			bArray2D atX: j atY: i put: (bArray2D atX: j + 1 atY: i) + s ] ].
+	^ bArray2D
+]
+
+{ #category : 'calculation' }
+NestedLoops >> economicSumming: aMatrix [
+	"За заданою квадратною матрицею aMatrix будує нову, чиї елементи є сумами відповідних прямокутних
+ ділянок заданої матриці. Індекси (i,j) елемента задають координати лівого нижнього кута ділянки.
+ Для обчислення нових елементів використано обчислені значення попередніх."
+
+	| n bMatrix |
+	n := aMatrix size.
+	bMatrix := self createMatrix: n.
+	(bMatrix at: 1) at: n put: ( (aMatrix at: 1) at: n ).
+	2 to: n do: [ :i |
+		(bMatrix at: i) at: n put: (((bMatrix at: i - 1) at: n) + ((aMatrix at: i) at: n)) ].
+	n - 1 to: 1 by: -1 do: [ :j |
+		| s |
+		s := 0.
+		1 to: n do: [ :i |
+			s := s + ((aMatrix at: i) at: j).
+			(bMatrix at: i) at: j put: ((bMatrix at: i) at: j + 1) + s ] ].
+	^ bMatrix
+]
+
+{ #category : 'calculation' }
 NestedLoops >> fillUnitaryArray2D: n [
 	"Створює двохвимірний масив, одиничну матрицю порядку n, послідовним заповненням."
 
@@ -149,6 +191,45 @@ NestedLoops >> refillUnitaryArray2D: n [
 ]
 
 { #category : 'calculation' }
+NestedLoops >> regionsArrSumming: anArray2D [
+	"За заданою квадратною матрицею, масивом anArray2D, будує нову, чиї елементи є сумами відповідних
+	 прямокутних ділянок заданої матриці. Індекси (i,j) елемента задають координати лівого нижнього кута
+	 ділянки. Використано зручний спосіб індексування."
+
+	| n bArray2D |
+	n := anArray2D width.
+	bArray2D := CTArray2D width: n height: n.
+	1 to: n do: [ :i |
+		1 to: n do: [ :j |
+			| s |
+			s := 0.
+			1 to: i do: [ :k |
+				j to: n do: [ :l |
+					s := s + (anArray2D at: l @ k) ] ].
+			bArray2D at: j @ i put: s ] ].
+	^ bArray2D
+]
+
+{ #category : 'calculation' }
+NestedLoops >> regionsSumming: aMatrix [
+	"За заданою квадратною матрицею aMatrix будує нову, чиї елементи є сумами відповідних прямокутних
+ ділянок заданої матриці. Індекси (i,j) елемента задають координати лівого нижнього кута ділянки."
+
+	| n bMatrix |
+	n := aMatrix size.
+	bMatrix := self createMatrix: n.
+	1 to: n do: [ :i |
+		1 to: n do: [ :j |
+			| s |
+			s := 0.
+			1 to: i do: [ :k |
+				j to: n do: [ :l |
+					s := s + ((aMatrix at: k) at: l) ] ].
+			(bMatrix at: i) at: j put: s ] ].
+	^ bMatrix
+]
+
+{ #category : 'calculation' }
 NestedLoops >> sequenceToArray2D: anArray [
 	"Вкладає послідовність у матрицю змійкою. Використано можливості
 	 класу CTArray2D звертатися відразу до цілих рядків."
@@ -212,12 +293,42 @@ NestedLoops >> snakeMatrix [
 	self showWindowLabeled: 'Матриця, заповнена змійкою' with: str
 ]
 
+{ #category : 'api - running' }
+NestedLoops >> summingMatrix [
+	"Будує квадратну матрицю, чиї елементи є сумами відповідних прямокутних ділянок заданої матриці.
+ Індекси (i,j) елемента задають координати лівого нижнього кута ділянки.
+ 'Задану матрицю' будуємо одним з відомих тут способів."
+
+	| n aMatrix bMatrix cMatrix anArray bArray cArray str |
+	n := self inputNatural.
+	aMatrix := self sequenceToMatrix: (1 to: n squared) asArray.
+	anArray := self sequenceToArray2D: (1 to: n squared) asArray.
+	bMatrix := self regionsSumming: aMatrix.
+	cMatrix := self economicSumming: aMatrix.
+	bArray := self regionsArrSumming: anArray.
+	cArray := self economicArrSumming: anArray.
+	str := String streamContents: [ :stream |
+		stream nextPutAll: '*** Побудова квадратної матриці,'; cr;
+			nextPutAll: ' чиї елементи є сумами елементів іншої матриці'; cr; cr;
+			nextPutAll: ' - Задана матриця'; cr.
+			self printMatrix: aMatrix on: stream.
+			stream nextPutAll: ' - Прямолінійне додавання матриці'; cr.
+			self printMatrix: bMatrix on: stream.
+			stream nextPutAll: ' - Економне додавання матриці'; cr.
+			self printMatrix: cMatrix on: stream.
+			stream nextPutAll: ' - Прямолінійне додавання двовимірного масиву'; cr.
+			bArray printGridOn: stream.
+			stream nextPutAll: ' - Економне додавання двовимірного масиву'; cr.
+			cArray printGridOn: stream ].
+	self showWindowLabeled: 'Додавання елементів ділянки матриці' with: str
+]
+
 { #category : 'calculation' }
 NestedLoops >> transposeArray2D: anArray2D [
 	"Будує транспоновану матрицю"
 
 	| trArray2D |
-	trArray2D := CTNewArray2D width: anArray2D height height: anArray2D width.
+	trArray2D := CTArray2D width: anArray2D height height: anArray2D width.
 	1 to: anArray2D height do: [ :i |
 		trArray2D atColumn: i put: (anArray2D atRow: i) ].
 	^ trArray2D
