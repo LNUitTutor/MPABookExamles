@@ -20,6 +20,63 @@ Class {
 }
 
 { #category : 'calculation' }
+NestedLoops >> addArray: a with: b [
+
+	^ CTArray2D
+		  fromArray: (a contents with: b contents collect: [ :aElem :bElem | aElem + bElem ])
+		  width: a width
+]
+
+{ #category : 'calculation' }
+NestedLoops >> addLoopsArray: a with: b [
+
+	| c n m |
+	n := a width.
+	m := a height.
+	c := CTArray2D width: n height: m.
+	1 to: n do: [ :i |
+		1 to: m do: [ :j |
+			c at: i @ j put: (a at: i @ j) + (b at: i @ j)
+		]
+	].
+	^ c
+]
+
+{ #category : 'calculation' }
+NestedLoops >> addMatrix: a with: b [
+
+	^ a with: b collect: [ :aRow :bRow |
+		  aRow with: bRow collect: [ :aElem :bElem | aElem + bElem ] ]
+]
+
+{ #category : 'api - running' }
+NestedLoops >> addMatrixes [
+	"Додає дві задані матриці різними способами. Заради простоти доданки створюють програмно"
+
+	| n aMatrix bMatrix cMatrix anArray bArray cArray dArray str |
+	n := self inputNatural.
+	aMatrix := self buildTriangleMatrix: n.
+	anArray := self refillTriangleArray2D: n.
+	bMatrix := self buildUnitaryMatrix: n.
+	bArray := self fillUnitaryArray2D: n.
+	cMatrix := self addMatrix: aMatrix with: bMatrix.
+	cArray := self addArray: anArray with: bArray.
+	dArray := self addLoopsArray: anArray with: bArray.
+	str := String streamContents: [ :stream |
+		stream nextPutAll: '*** Додавання матриць заданого розміру:'; cr;
+			nextPutAll: ' трикутної та одиничної'; cr; cr;
+			nextPutAll: ' - Трикутна матриця'; cr.
+			self printMatrix: aMatrix on: stream.
+			stream nextPutAll: ' - Сума заданої та одиничної'; cr.
+			self printMatrix: cMatrix on: stream.
+			stream nextPutAll: ' - Додавання вмісту двовимірних масивів'; cr.
+			cArray printGridOn: stream.
+			stream nextPutAll: ' - Поелементне додавання двовимірних масивів'; cr.
+			dArray printGridOn: stream ].
+	self showWindowLabeled: 'Обчислення суми матриць' with: str
+]
+
+{ #category : 'calculation' }
 NestedLoops >> buildTriangleMatrix: n [
 	"Створює масив масивів, верхньотрикутну матрицю порядку n, розділену побічною діагоналлю."
 
