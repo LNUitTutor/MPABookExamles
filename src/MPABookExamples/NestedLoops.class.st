@@ -209,6 +209,58 @@ NestedLoops >> matrixFromSequence: anArray [
 ]
 
 { #category : 'calculation' }
+NestedLoops >> moveMaxIn: aMatrix [
+" Переставляє рядки і стовпці матриці так, щоб найбільший за абсолютною величиною
+ елемент розташувався в лівому верхньому куті."
+
+	| maxValue maxRow maxColumn toSwap unswer |
+	maxValue := ((aMatrix at: 1) at: 1) abs.
+	maxRow := 1.
+	maxColumn := 1.
+	aMatrix withIndexDo: [ :row :i |
+		row withIndexDo: [ :elem :j |
+			elem abs > maxValue ifTrue: [ 
+				maxValue := elem abs. maxRow := i. maxColumn := j ]
+		] ].
+	unswer := aMatrix deepCopy.
+	maxRow ~= 1 ifTrue: [ 
+		toSwap := unswer at: 1.
+		unswer at: 1 put: (unswer at: maxRow).
+		unswer at: maxRow put: toSwap ].
+	maxColumn ~= 1 ifTrue: [ 
+		unswer do: [ :row |
+			toSwap := row at: 1.
+			row at: 1 put: (row at: maxColumn).
+			row at: maxColumn put: toSwap ] ].
+	^ unswer
+]
+
+{ #category : 'calculation' }
+NestedLoops >> moveMaximalIn: anArray [
+" Переставляє рядки і стовпці двохвимірного масиву так, щоб найбільший за абсолютною величиною
+ елемент розташувався в лівому верхньому куті."
+
+	| maxValue maxRow maxColumn toSwap unswer |
+	maxValue := (anArray at: 1 @ 1) abs.
+	maxRow := 1.
+	maxColumn := 1.
+	anArray rowAndColumnValuesDo: [ :row :column :elem |
+		elem abs > maxValue ifTrue: [ 
+			maxValue := elem abs. maxRow := row. maxColumn := column ]
+		].
+	unswer := anArray deepCopy.
+	maxRow ~= 1 ifTrue: [ 
+		toSwap := unswer atRow: 1.
+		unswer atRow: 1 put: (unswer atRow: maxRow).
+		unswer atRow: maxRow put: toSwap ].
+	maxColumn ~= 1 ifTrue: [ 
+		toSwap := unswer atColumn: 1.
+		unswer atColumn: 1 put: (unswer atColumn: maxColumn).
+		unswer atColumn: maxColumn put: toSwap ].
+	^ unswer
+]
+
+{ #category : 'calculation' }
 NestedLoops >> multArray: a by: b [
 
 	| c y |
@@ -289,6 +341,35 @@ NestedLoops >> printMatrix: aMatrix on: aStream [
 aMatrix do: [ :row |
 	row do: [ :elem | self print: elem on: aStream width: 6 ].
 	aStream cr ]
+]
+
+{ #category : 'api - running' }
+NestedLoops >> rearrangeMatrix [
+	"Знаходить найбільший за абсолютною величиною елемент матриці.
+	Переставляє рядки і стовпці матриці так, щоб він опинився на першому
+	місці першого рядка. Заради простоти матриці створюють програмно"
+
+	| aMatrix bMatrix anArray bArray str |
+	aMatrix := #((1 2 3 4) (0 5 6 1) (2 7 9 8)).
+	anArray := CTArray2D fromArray: aMatrix flattened width: 4.
+	bMatrix := #((-15 10 14) (11 12 13)).
+	bArray := CTArray2D fromArray: bMatrix flattened width: 3.
+	str := String streamContents: [ :stream |
+		stream nextPutAll: '*** Перебудова заданої матриці:'; cr;
+			nextPutAll: ' головний елемент переставляють у лівий верхній кут'; cr; cr;
+			nextPutAll: ' - Задані матриці'; cr.
+			self printMatrix: aMatrix on: stream.
+			stream cr.
+			self printMatrix: bMatrix on: stream.
+			stream nextPutAll: ' - Перебудовані матриці'; cr.
+			self printMatrix: (self moveMaxIn: aMatrix) on: stream.
+			stream cr.
+			self printMatrix: (self moveMaxIn: bMatrix) on: stream.
+			stream nextPutAll: ' - Перебудовані двовимірні масиви'; cr.
+			(self moveMaximalIn: anArray) printGridOn: stream.
+			stream cr.
+			(self moveMaximalIn: bArray) printGridOn: stream ].
+	self showWindowLabeled: 'Перебудова матриць' with: str
 ]
 
 { #category : 'calculation' }
