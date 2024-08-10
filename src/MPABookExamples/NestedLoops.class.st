@@ -208,6 +208,72 @@ NestedLoops >> matrixFromSequence: anArray [
 	^ matrix
 ]
 
+{ #category : 'calculation' }
+NestedLoops >> multArray: a by: b [
+
+	| c y |
+	a width = b height ifFalse: [ ^ self error: 'Incomartible size of multiplier' ].
+	c := CTArray2D width: b width height: a height.
+	y := 0.
+	a rowsDo: [ :row | y := y + 1.
+		1 to: b width do: [ :x |
+			| s | s := 0.
+			row with: (b atColumn: x) do: [ :aElem :bElem | s := s + (aElem * bElem) ].
+			c atColumn: x atRow: y put: s ] ].
+	^ c
+]
+
+{ #category : 'calculation' }
+NestedLoops >> multMatrix: a by: b [
+
+	| aWidth aHeight bWidth bHeight c |
+	aWidth := (a at: 1) size.
+	aHeight := a size.
+	bWidth := (b at: 1) size.
+	bHeight := b size.
+	aWidth = bHeight ifFalse: [ ^ self error: 'Incomartible size of multiplier' ].
+	c := Array new: aHeight.
+	1 to: aHeight do: [ :i | c at: i put: (Array new: bWidth) ].
+	1 to: aHeight do: [ :i |
+		1 to: bWidth do: [ :j |
+			| s | s := 0.
+			1 to: aWidth do: [ :k | s := s + (((a at: i) at: k) * ((b at: k) at: j)) ].
+			(c at: i) at: j put: s ] ].
+	^ c
+]
+
+{ #category : 'api - running' }
+NestedLoops >> multMatrixes [
+	"Множить дві задані матриці різними способами. Заради простоти множники створюють програмно"
+
+	| aMatrix bMatrix cMatrix anArray bArray cArray dArray str |
+	aMatrix := #((1 2 3) (4 5 6) (7 8 0)).
+	bMatrix := #((-16 8 -1) (14 -7 2) (-1 2 -1)).
+	anArray := CTArray2D fromArray: aMatrix flattened width: 3.
+	bArray := CTArray2D fromArray: { -16/9 . 8/9 . -1/9 . 14/9 . -7/9 . 2/9 . -1/9 . 2/9 . -1/9 } width: 3.
+	cMatrix := self multMatrix: aMatrix by: bMatrix.
+	cArray := self multArray: anArray by: bArray.
+	dArray := CTArray2D fromArray: #(1 2 3 4 5 6 7 8 9 0 1 2) width: 4.
+	str := String streamContents: [ :stream |
+		stream nextPutAll: '*** Множення матриць:'; cr; cr;
+			nextPutAll: ' - Задана квадратна матриця'; cr.
+			self printMatrix: aMatrix on: stream.
+			stream nextPutAll: ' - Майже обернена матриця'; cr.
+			self printMatrix: bMatrix on: stream.
+			stream nextPutAll: ' - Добуток заданої та майже оберненої'; cr.
+			self printMatrix: cMatrix on: stream.
+			stream nextPutAll: ' - Добуток заданої матриці (масиву) та оберненої'; cr.
+			cArray printGridOn: stream.
+			stream nextPutAll: ' - Задана прямокутна матриця (масив)'; cr.
+			dArray printGridOn: stream.
+			stream nextPutAll: ' - Добуток прямокутної та транспонованої'; cr.
+			(self multArray: dArray by: (self transposeArray2D: dArray)) printGridOn: stream.
+			stream nextPutAll: ' - Добуток транспонованої та прямокутної'; cr.
+			(self multArray: (self transposeArray2D: dArray) by: dArray) printGridOn: stream
+		].
+	self showWindowLabeled: 'Обчислення добутку матриць' with: str
+]
+
 { #category : 'printing' }
 NestedLoops >> print: anInteger on: aStream width: w [
 	"Друкує число anInteger в потік aStream у полі шириною w, ліву частину заповнює пропусками."
