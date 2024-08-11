@@ -10,6 +10,31 @@ Class {
 }
 
 { #category : 'api - running' }
+AccuracyCalc >> calculateRoots [
+	"Обчислити методом поділу відрізка навпіл корені рівняння x^2+4x–32=0 на проміжках [–8,4; –7,7] та
+	 [3,7; 4,2] з точністю 1e–4 і корінь рівняння e^2x=3 на проміжку [0,5; 1] з точністю 1e–8."
+
+	| x1 x2 xe r1 r2 re str |
+	x1 := self dichotom: [ :x | (x + 4) * x - 32 ] on: -8.4 to: -7.7 accuracy: 1e-4.
+	x2 := self dichotom: [ :x | (x + 4) * x - 32 ] on: 3.7 to: 4.2 accuracy: 1e-4.
+	xe := self dichotom: [ :x | (2 * x) exp - 3.0 ] on: 0.5 to: 1.0 accuracy: 1e-8.
+	r1 := self dichotomRecursive: [ :x | (x + 4) * x - 32 ] on: -8.4 to: -7.7 accuracy: 1e-4.
+	r2 := self dichotomRecursive: [ :x | (x + 4) * x - 32 ] on: 3.7 to: 4.2 accuracy: 1e-4.
+	re := self dichotomRecursive: [ :x | (2 * x) exp - 3.0 ] on: 0.5 to: 1.0 accuracy: 1e-8.
+	str := String streamContents: [ :stream |
+		stream nextPutAll: '*** Обчислення кореня рівняння методом дихотомії:'; cr; cr;
+			nextPutAll: ' Ітеративно:'; cr;
+			nextPutAll: ' - корені параболи   x1 = '; print: x1;
+			nextPutAll: '   x2 = '; print: x2; cr;
+			nextPutAll: ' - корінь експоненти   x = '; print: xe; cr; cr.
+		stream nextPutAll: ' Рекурсивно:'; cr;
+			nextPutAll: ' - корені параболи   x1 = '; print: r1;
+			nextPutAll: '   x2 = '; print: r2; cr;
+			nextPutAll: ' - корінь експоненти   x = '; print: re; cr ].
+	self showWindowLabeled: 'Обчислення кореня алгебричного рівняння' with: str
+]
+
+{ #category : 'api - running' }
 AccuracyCalc >> calculateSinus [
 	"Обчислює синус заданого дійсного числа як суму ряду і стандартним методом"
 
@@ -37,6 +62,38 @@ AccuracyCalc >> calculateSumm [
 			nextPutAll: 'x = '; print: x; cr;
 			nextPutAll: 'eps = '; print: eps; cr;
 			nextPutAll: 'Sum = '; print: s ])
+]
+
+{ #category : 'calculation' }
+AccuracyCalc >> dichotom: f on: left to: right accuracy: eps [
+	"Обчислює методом поділу відрізка навпіл корінь рівняння
+    f(x) = 0, x є [a;b]. f - блок з одним аргументом "
+
+	| fa a b |
+	a := left.
+	b := right.
+	fa := f value: a.
+	[ b - a > eps ] whileTrue: [ | c fc |
+		c := (a + b) * 0.5.
+		fc := f value: c.
+		fa * fc < 0
+			ifTrue: [ b := c ]
+			ifFalse: [ a := c.
+				fa := fc ] ].
+	^ (a + b) * 0.5
+]
+
+{ #category : 'calculation' }
+AccuracyCalc >> dichotomRecursive: f on: a to: b accuracy: eps [
+	"Рекурсивно обчислює методом поділу відрізка навпіл корінь рівняння
+    f(x) = 0, x є [a;b]. f - блок з одним аргументом "
+
+	| c |
+	c := (a + b) * 0.5.
+	b - a <= eps ifTrue: [ ^ c ].
+	(f value: a) * (f value: c) < 0
+		ifTrue: [ ^ self dichotomRecursive: f on: a to: c accuracy: eps ]
+		ifFalse: [ ^ self dichotomRecursive: f on: c to: b accuracy: eps ]
 ]
 
 { #category : 'output' }
@@ -72,6 +129,19 @@ AccuracyCalc >> seriesSumFor: x withAccuracy: eps [
 		term := semiterm / (4 * k + 3).
 		sum := sum + term ].
 	^ sum
+]
+
+{ #category : 'output' }
+AccuracyCalc >> showWindowLabeled: labelString with: text [
+	"Відкриває окреме текстове вікно з об'ємними результатами"
+
+	(SystemWindow labelled: labelString)
+		addMorph: (RubScrolledTextMorph new
+				 setText: text;
+				 font: StandardFonts codeFont;
+				 yourself)
+		frame: (0 @ 0 corner: 1 @ 1);
+		openInWorld
 ]
 
 { #category : 'calculation' }
