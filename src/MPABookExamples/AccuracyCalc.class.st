@@ -10,6 +10,30 @@ Class {
 }
 
 { #category : 'api - running' }
+AccuracyCalc >> calculateIntegrals [
+	"Обчислити методом лівих прямокутників Integral(sin x, 0, Pi) з точністю 1e-6,
+ серію інтегралів S(t) = Integral(t^2 x^2 + 1, -1, 1) для t=0(0.5)3 з точністю 1e-5
+ і значення R = Integral((x + 2y)^2, 0, 1, 0, x) з точністю 10-4."
+
+	| stream di |
+	stream := String new writeStream.
+	stream nextPutAll: '*** Обчислення інтегралів методом лівих прямокутників'; cr; cr;
+		nextPutAll: 'Integral(sin,0,Pi) = ';
+		print: (self integrate: [ :x | x sin ] from: 0.0 to: Float pi accuracy: 1e-6); cr; cr.
+	stream nextPutAll: '   t    S(t)'; cr; nextPutAll: '----------------------'; cr.
+	0.0 to: 3.0 by: 0.5 do: [ :t |
+		stream nextPutAll: '  '; print: t; nextPutAll: '   ';
+			print: (self integrate: [ :x | (x * t) squared + 1.0 ] from: -1.0 to: 1.0 accuracy: 1e-5);
+			cr ].
+	di := self integrate: [ :x |
+		 		self integrate: [ :y | (2 * y + x) squared ] from: 0.0 to: x accuracy: 1e-4]
+	 		from: 0.0 to: 1.0 accuracy: 1e-4. 
+	stream cr; nextPutAll: 'Подвійний інтеграл повторним числовим інтегруванням'; cr;
+		nextPutAll: 'Double integral = ';	print: di; cr.
+	self showWindowLabeled: 'Числове інтегрування' with: stream contents
+]
+
+{ #category : 'api - running' }
 AccuracyCalc >> calculateRoots [
 	"Обчислити методом поділу відрізка навпіл корені рівняння x^2+4x–32=0 на проміжках [–8,4; –7,7] та
 	 [3,7; 4,2] з точністю 1e–4 і корінь рівняння e^2x=3 на проміжку [0,5; 1] з точністю 1e–8."
@@ -117,26 +141,26 @@ AccuracyCalc >> inputFloatPrompt: aString [
 AccuracyCalc >> integrate: f from: a to: b accuracy: eps [
 	"Обчислює методом лівих прямокутників означений інтеграл функції f(x) на проміжку [a;b] з точністю eps.
     Крок інтегрування вибирається автоматично. Точність коньтролюють за правилом Рунге.
-    Дозволено не більше 15 подвоєнь сітки інтегрування."
+    Дозволено не більше 12 подвоєнь сітки інтегрування."
 
 	| n h sum integN integ2N doublings h2 a2 |
-	n := 20.
+	n := 10.
 	h := (b - a) / n.
 	sum := 0.0.
 	integN := 0.0.
-	1 to: n - 1 do: [ :i | sum := sum + (f value: i * h + a) ].
+	0 to: n - 1 do: [ :i | sum := sum + (f value: i * h + a) ].
 	integ2N := sum * h.
 	doublings := 0.
-	[ (integ2N - integN) abs / 3.0 > eps and: [ doublings < 16 ] ] whileTrue: [ 
+	[ (integ2N - integN) abs / 3.0 > eps and: [ doublings < 13 ] ] whileTrue: [ 
 		doublings := doublings + 1.
 		integN := integ2N.
 		h2 := h * 0.5.
 		a2 := a + h2.
-		1 to: n - 1 do: [ :i | sum := sum + (f value: i * h + a2) ].
+		0 to: n - 1 do: [ :i | sum := sum + (f value: i * h + a2) ].
 		integ2N := sum * h2.
 		h := h2.
 		n := n * 2 ].
-	doublings > 15 ifTrue: [ UIManager default inform: 'integrate::WARNING: Accuracy loss is possible' ].
+	doublings > 12 ifTrue: [ UIManager default inform: 'integrate::WARNING: Accuracy loss is possible' ].
 	^ integ2N
 ]
 
