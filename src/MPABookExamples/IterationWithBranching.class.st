@@ -223,7 +223,7 @@ IterationWithBranching >> indexOfMaxPharo: anArray [
 
 { #category : 'output' }
 IterationWithBranching >> informAbout: aString [
-	"Повідомляє результат у інформаційному вікні, що закривається автоматично"
+	"Повідомляє результат у інформаційному вікні діалогу"
 
 	UIManager default message: aString title: 'Результати обчислень'
 ]
