@@ -114,6 +114,33 @@ AccuracyCalc >> inputFloatPrompt: aString [
 ]
 
 { #category : 'calculation' }
+AccuracyCalc >> integrate: f from: a to: b accuracy: eps [
+	"Обчислює методом лівих прямокутників означений інтеграл функції f(x) на проміжку [a;b] з точністю eps.
+    Крок інтегрування вибирається автоматично. Точність коньтролюють за правилом Рунге.
+    Дозволено не більше 15 подвоєнь сітки інтегрування."
+
+	| n h sum integN integ2N doublings h2 a2 |
+	n := 20.
+	h := (b - a) / n.
+	sum := 0.0.
+	integN := 0.0.
+	1 to: n - 1 do: [ :i | sum := sum + (f value: i * h + a) ].
+	integ2N := sum * h.
+	doublings := 0.
+	[ (integ2N - integN) abs / 3.0 > eps and: [ doublings < 16 ] ] whileTrue: [ 
+		doublings := doublings + 1.
+		integN := integ2N.
+		h2 := h * 0.5.
+		a2 := a + h2.
+		1 to: n - 1 do: [ :i | sum := sum + (f value: i * h + a2) ].
+		integ2N := sum * h2.
+		h := h2.
+		n := n * 2 ].
+	doublings > 15 ifTrue: [ UIManager default inform: 'integrate::WARNING: Accuracy loss is possible' ].
+	^ integ2N
+]
+
+{ #category : 'calculation' }
 AccuracyCalc >> seriesSumFor: x withAccuracy: eps [
 	"Обчислення суми ряду S((-1)^k x^4k+3 / (2k+1)!(4k+3))"
 
