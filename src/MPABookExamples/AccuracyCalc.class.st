@@ -9,6 +9,26 @@ Class {
 	#tag : 'Chapter07'
 }
 
+{ #category : 'accessing - ui' }
+AccuracyCalc class >> runTasks [
+
+	<script>
+	| answer |
+	answer := UIManager default
+		          chooseFrom:
+			          #( 'Значення sin(x) як суми ряду'
+							 'Сума знакозмінного ряду'
+							 'Обчислення коренів алгебричного рівняння'
+							 'Числове інтегрування' )
+		          values:
+		          #( calculateSinus calculateSumm calculateRoots calculateIntegrals )
+		          lines: #()
+		          title: 'Оберіть задачу'.
+	answer ifNotNil: [
+		self new perform: answer.
+		self runTasks ]
+]
+
 { #category : 'api - running' }
 AccuracyCalc >> calculateIntegrals [
 	"Обчислити методом лівих прямокутників Integral(sin x, 0, Pi) з точністю 1e-6,
