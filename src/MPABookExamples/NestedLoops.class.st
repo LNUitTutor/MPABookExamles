@@ -19,6 +19,30 @@ Class {
 	#tag : 'Chapter04'
 }
 
+{ #category : 'accessing - ui' }
+NestedLoops class >> runTasks [
+
+	<script>
+	| answer |
+	answer := UIManager default
+		          chooseFrom:
+			          #( 'Побудова одиничної матриці'
+							 'Побудова трикутно-діагональної матриці'
+							 'Укладання послідовності "змійкою"'
+							 'Підсумовування прямокутних сегментів'
+							 'Додавання матриць'
+							 'Множення матриць'
+							 'Переміщення максимального елемента матриці' )
+		          values:
+		          #( unitaryMatrix triangleMatrix snakeMatrix summingMatrix
+						 addMatrixes multMatrixes rearrangeMatrix )
+		          lines: #()
+		          title: 'Оберіть задачу'.
+	answer ifNotNil: [
+		self new perform: answer.
+		self runTasks ]
+]
+
 { #category : 'calculation' }
 NestedLoops >> addArray: a with: b [
 
