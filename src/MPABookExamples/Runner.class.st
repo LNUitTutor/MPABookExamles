@@ -19,6 +19,22 @@ Runner >> inputNatural [
 		   title: 'Запит') asInteger abs
 ]
 
+{ #category : 'api - running' }
+Runner >> quickSortArray [
+
+	| arr stream |
+	stream := String new writeStream.
+	arr := Sorter example1.
+	stream nextPutAll: 'Початковий масив'; cr.
+	arr printOn: stream.
+	arr stableQuickSort.
+	stream nextPutAll: 'Результати швидкого стабільного сортування'; cr.
+	arr printOn: stream.
+	stream nextPutAll: 'Результати швидкого сортування'; cr.
+	Sorter example1 quickSort printOn: stream.
+	self showWindowLabeled: 'Впорядкування масиву за зростанням' with: stream contents
+]
+
 { #category : 'output' }
 Runner >> showWindowLabeled: labelString with: text [
 	"Відкриває окреме текстове вікно з об'ємними результатами"
