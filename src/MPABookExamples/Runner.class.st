@@ -1,0 +1,52 @@
+"
+Клвс використовують для запуску прикалдів розділу 10 Рекурсія
+"
+Class {
+	#name : 'Runner',
+	#superclass : 'Object',
+	#category : 'MPABookExamples-Chapter10',
+	#package : 'MPABookExamples',
+	#tag : 'Chapter10'
+}
+
+{ #category : 'input' }
+Runner >> inputNatural [
+	"Відкриває вікно діалогу для введення цілого числа. Не виконує ніяких перевірок"
+
+	^ (UIManager default
+		   request: 'Введіть натуральне число'
+		   initialAnswer: '1'
+		   title: 'Запит') asInteger abs
+]
+
+{ #category : 'output' }
+Runner >> showWindowLabeled: labelString with: text [
+	"Відкриває окреме текстове вікно з об'ємними результатами"
+
+	(SystemWindow labelled: labelString)
+		addMorph: (RubScrolledTextMorph new
+				 setText: text;
+				 font: StandardFonts codeFont;
+				 yourself)
+		frame: (0 @ 0 corner: 1 @ 1);
+		openInWorld
+]
+
+{ #category : 'api - running' }
+Runner >> solveHanoiTower [
+
+	| n solver stream |
+	stream := String new writeStream.
+	solver := HanoiSolwer new.
+	n := self inputNatural.
+	stream
+		nextPutAll: 'Висота вежі: ';
+		print: n;
+		cr.
+	solver
+		solve: n;
+		printSolutionOn: stream.
+	self
+		showWindowLabeled: 'Розв''язування задачі про Ханойські вежі'
+		with: stream contents
+]
