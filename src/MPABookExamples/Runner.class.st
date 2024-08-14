@@ -1,5 +1,5 @@
 "
-Клвс використовують для запуску прикалдів розділу 10 Рекурсія
+Клвс використовують для запуску прикладів розділу 10 Рекурсія
 "
 Class {
 	#name : 'Runner',
@@ -8,6 +8,25 @@ Class {
 	#package : 'MPABookExamples',
 	#tag : 'Chapter10'
 }
+
+{ #category : 'accessing - ui' }
+Runner class >> runTasks [
+
+	<script>
+	| answer |
+	answer := UIManager default
+		          chooseFrom:
+			          #( 'Задача про Ханойські вежі'
+							 'Алгоритм швидкого сортування'
+							 'Обхід двійкового дерева' )
+		          values:
+		          #( solveHanoiTower quickSortArray traverseTree )
+		          lines: #()
+		          title: 'Оберіть задачу'.
+	answer ifNotNil: [
+		self new perform: answer.
+		self runTasks ]
+]
 
 { #category : 'input' }
 Runner >> inputNatural [
