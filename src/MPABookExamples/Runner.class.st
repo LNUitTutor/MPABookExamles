@@ -50,3 +50,21 @@ Runner >> solveHanoiTower [
 		showWindowLabeled: 'Розв''язування задачі про Ханойські вежі'
 		with: stream contents
 ]
+
+{ #category : 'api - running' }
+Runner >> traverseTree [
+
+	| tree sum prs stream |
+	stream := String new writeStream.
+	tree := Tree example1.
+	prs := tree preorderSum.
+	sum := tree sum.
+	stream
+		nextPutAll: 'Задане дерево:'; cr;
+		print: tree; cr;
+		nextPutAll: ' preorder sum = ';
+		print: prs; cr;
+		nextPutAll: '  economy sum = ';
+		print: sum; cr.
+	self showWindowLabeled: 'Обхід двійкового дерева' with: stream contents
+]
