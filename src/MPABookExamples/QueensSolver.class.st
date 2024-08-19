@@ -98,10 +98,10 @@ QueensSolver >> getInitialArray: n [
 { #category : 'initialization' }
 QueensSolver >> initCoords: n [
 
-	xCoord := (1 to: n) asSortedCollection.
+	xCoord := (1 to: n) asArray.
 	yCoord := (1 to: n) asSortedCollection.
-	uCoord := (1 - n to: n - 1) asSortedCollection.
-	vCoord := (2 to: 2 * n) asSortedCollection.
+	uCoord := (1 - n to: n - 1) asOrderedCollection.
+	vCoord := (2 to: 2 * n) asOrderedCollection.
 	queens := OrderedCollection new
 ]
 
