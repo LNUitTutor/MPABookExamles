@@ -56,7 +56,8 @@ IntegerArithmetic >> checkBezuHypothesis [
 	k := inpt at: 3.
 	a > b ifTrue: [ ^ self confirmAbout:
 		'Введено неправильні межі проміжка [' , a printString , '; ', b printString , ']' ].
-	text := WriteStream with: (String new).
+	text := self checkHipothesisFrom: a to: b times: k.
+	"WriteStream with: (String new).
 	a to: b do: [ :aNumber |
 		res := self checkHipothesisFor: aNumber untilTimes: k.
 		text
@@ -68,7 +69,7 @@ IntegerArithmetic >> checkBezuHypothesis [
 					nextPutAll: 'отримано паліндром ';
 					print: (res at: 3); cr ]
 			ifFalse: [ text
-					nextPutAll: 'гіпотеза не виконується'; cr ] ].
+					nextPutAll: 'гіпотеза не виконується'; cr ] ]."
 	self showWindowLabeled: 'Результати перевірки гіпотези Безу' with: text contents
 ]
 
@@ -85,6 +86,29 @@ IntegerArithmetic >> checkHipothesisFor: aNumber untilTimes: k [
 	   counter := counter + 1.
 	   reversed ~= direct and: [ counter <= k ] ] whileTrue.
    ^ { reversed = direct . counter . reversed }
+]
+
+{ #category : 'calculation' }
+IntegerArithmetic >> checkHipothesisFrom: a to: b times: k [
+	"Перевіряє гіпотезу Безу для всіх цілих з проміжку [a; b].
+ До кожного з чисел застосовує не більше за k перетворень."
+
+	| text result |
+	text := WriteStream with: (String new).
+	a to: b do: [ :aNumber |
+		result := self checkHipothesisFor: aNumber untilTimes: k.
+		text
+			nextPutAll: 'Для числа '; print: aNumber;
+			nextPutAll: ' за '; print: (result at: 2);
+			nextPutAll: ' крок(и) '.
+		(result at: 1)
+			ifTrue: [ text
+					nextPutAll: 'отримано паліндром ';
+					print: (result at: 3); cr ]
+			ifFalse: [ text
+					nextPutAll: 'гіпотеза не виконується'; cr ] ].
+	^ text
+
 ]
 
 { #category : 'output' }
